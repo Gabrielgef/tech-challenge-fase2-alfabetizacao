@@ -1,61 +1,80 @@
-# tech-challenge-fase2-alfabetizacao
+# Tech Challenge - Fase 2: Arquitetura de Dados de Alfabetização
 
-<a target="_blank" href="https://cookiecutter-data-science.drivendata.org/">
-    <img src="https://img.shields.io/badge/CCDS-Project%20template-328F97?logo=cookiecutter" />
-</a>
+Este repositório contém a implementação de um Data Lake (Arquitetura Medalhão) focado em dados de alfabetização do Inep, utilizando serviços AWS (S3, Athena, Glue, Step Functions e EventBridge) e orquestração orientada a eventos (Event-Driven).
 
-A short description of the project.
+## 🗂️ Estrutura do Repositório
 
-## Project Organization
+    ├── .github/
+    ├── infraestrutura/
+    │   ├── 01_setup_pastas_s3.py
+    │   ├── 02_setup_glue_crawler.py
+    │   ├── 03_eventbridge_rule.json
+    │   ├── 04_step_function_pipeline.json
+    │   └── 05_setup_tabelas_bronze.sql
+    ├── src/
+    │   ├── camada_bronze/
+    │   │   ├── 01_insert_dicionario.sql
+    │   │   ├── 02_insert_uf.sql
+    │   │   ├── 03_insert_municipio.sql
+    │   │   ├── 04_insert_meta_alfabetizacao_brasil.sql
+    │   │   ├── 05_insert_meta_alfabetizacao_uf.sql
+    │   │   ├── 06_insert_meta_alfabetizacao_municipio.sql
+    │   │   └── 07_insert_alunos.sql
+    │   └── ingestao_raw/
+    │       └── 01_extracao_dados.py
+    ├── .env.example
+    ├── .gitignore
+    ├── pyproject.toml
+    └── README.md
 
-```
-├── LICENSE            <- Open-source license if one is chosen
-├── Makefile           <- Makefile with convenience commands like `make data` or `make train`
-├── README.md          <- The top-level README for developers using this project.
-├── data
-│   ├── external       <- Data from third party sources.
-│   ├── interim        <- Intermediate data that has been transformed.
-│   ├── processed      <- The final, canonical data sets for modeling.
-│   └── raw            <- The original, immutable data dump.
-│
-├── docs               <- A default mkdocs project; see www.mkdocs.org for details
-│
-├── models             <- Trained and serialized models, model predictions, or model summaries
-│
-├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-│                         the creator's initials, and a short `-` delimited description, e.g.
-│                         `1.0-jqp-initial-data-exploration`.
-│
-├── pyproject.toml     <- Project configuration file with package metadata for 
-│                         tech_challenge_fase2_alfabetizacao and configuration for tools like black
-│
-├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-│
-├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-│   └── figures        <- Generated graphics and figures to be used in reporting
-│
-├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-│                         generated with `pip freeze > requirements.txt`
-│
-├── setup.cfg          <- Configuration file for flake8
-│
-└── tech_challenge_fase2_alfabetizacao   <- Source code for use in this project.
-    │
-    ├── __init__.py             <- Makes tech_challenge_fase2_alfabetizacao a Python module
-    │
-    ├── config.py               <- Store useful variables and configuration
-    │
-    ├── dataset.py              <- Scripts to download or generate data
-    │
-    ├── features.py             <- Code to create features for modeling
-    │
-    ├── modeling                
-    │   ├── __init__.py 
-    │   ├── predict.py          <- Code to run model inference with trained models          
-    │   └── train.py            <- Code to train models
-    │
-    └── plots.py                <- Code to create visualizations
-```
+## 🛠️ Pré-requisitos
 
---------
+Antes de executar os scripts, garanta que seu ambiente possui:
+
+1. **Python 3.9+** e dependências instaladas (via `pyproject.toml`).
+2. **AWS CLI** instalado e configurado (`aws configure`) com as credenciais da sua LabRole.
+3. **Google Cloud Platform (GCP):** Um ID de projeto válido (`billing_project_id`) para consultar a Base dos Dados via BigQuery.
+4. **Arquivo .env**: Faça uma cópia do arquivo `.env.example`, renomeie para `.env` e preencha as variáveis de ambiente necessárias:
+   * `AWS_ACCOUNT_ID`: Seu ID da conta AWS.
+   * `BILLING_PROJECT_ID`: Seu ID de projeto do Google Cloud.
+   * `NOME_DO_BUCKET`: O nome escolhido para o seu bucket S3.
+
+---
+
+## 🏗️ Passo 1: Setup da Infraestrutura (IaC)
+
+A infraestrutura deve ser provisionada uma única vez antes de qualquer ingestão de dados. 
+
+### 1.1. Criação das Camadas no S3
+Gera a estrutura física do Data Lake.
+
+    python infraestrutura/01_setup_pastas_s3.py
+
+### 1.2. Configuração do Glue Crawler
+Cria o banco `db_raw_alfabetizacao` e provisiona o Crawler.
+
+    python infraestrutura/02_setup_glue_crawler.py
+
+### 1.3. Orquestração (Step Functions e EventBridge)
+1. Acesse o AWS Step Functions e crie uma nova Máquina de Estados colando o conteúdo de `infraestrutura/04_step_function_pipeline.json`.
+2. Acesse o Amazon EventBridge e crie uma regra apontando para o arquivo `infraestrutura/03_eventbridge_rule.json`. Isso garante que o pipeline inicie apenas após a criação do arquivo `_SUCCESS.flag`.
+
+### 1.4. Setup da Camada Bronze (Athena DDL)
+1. Abra o console do Amazon Athena.
+2. Copie o conteúdo de `infraestrutura/05_setup_tabelas_bronze.sql`.
+3. Selecione e execute cada bloco individualmente para provisionar as 7 tabelas.
+
+---
+
+## 🚀 Passo 2: Execução e Ingestão de Dados
+
+### Ingestão Raw
+O script abaixo conecta ao BigQuery via API da Base dos Dados, extrai os CSVs e faz o upload para o S3.
+
+**Nota sobre execução:** Caso não tenha o Google Cloud SDK configurado no seu ambiente local, recomenda-se rodar o conteúdo do arquivo `01_extracao_dados.py` no Google Colab para facilitar a autenticação do usuário.
+
+    python src/ingestao_raw/01_extracao_dados.py
+
+**O Fluxo Automatizado:**
+Ao finalizar o upload, o script gera um `_SUCCESS.flag`. O EventBridge intercepta esse evento e dispara o Step Functions. O pipeline atualizará a Raw via Crawler e executará as queries da pasta `src/camada_bronze/`, populando as tabelas particionadas no S3.
 
