@@ -1,0 +1,14 @@
+{
+  "source": ["aws.s3"],
+  "detail-type": ["Object Created"],
+  "detail": {
+    "bucket": {
+      "name": ["<NOME_DO_SEU_BUCKET_RAW>"] 
+    },
+    "object": {
+      "key": [{
+        "suffix": "_SUCCESS.flag"
+      }]
+    }
+  }
+}

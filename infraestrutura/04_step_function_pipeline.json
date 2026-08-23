@@ -1,0 +1,176 @@
+{
+  "Comment": "Pipeline de orquestração da Camada Bronze - Tech Challenge",
+  "StartAt": "StartCrawler",
+  "States": {
+    "StartCrawler": {
+      "Type": "Task",
+      "Parameters": {
+        "Name": "crawler_tech_challenge_raw"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Next": "WaitForCrawler",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "Glue.CrawlerRunningException"
+          ],
+          "Next": "WaitForCrawler"
+        }
+      ]
+    },
+    "WaitForCrawler": {
+      "Type": "Wait",
+      "Seconds": 30,
+      "Next": "GetCrawlerStatus"
+    },
+    "GetCrawlerStatus": {
+      "Type": "Task",
+      "Parameters": {
+        "Name": "crawler_tech_challenge_raw"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:getCrawler",
+      "Next": "IsCrawlerRunning"
+    },
+    "IsCrawlerRunning": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "RUNNING",
+          "Next": "WaitForCrawler"
+        },
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "STOPPING",
+          "Next": "WaitForCrawler"
+        }
+      ],
+      "Default": "ProcessarCamadaBronze"
+    },
+    "ProcessarCamadaBronze": {
+      "Type": "Parallel",
+      "End": true,
+      "Branches": [
+        {
+          "StartAt": "InsertAlunos",
+          "States": {
+            "InsertAlunos": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.alunos SELECT DISTINCT * FROM db_raw_alfabetizacao.alunos;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InsertDicionario",
+          "States": {
+            "InsertDicionario": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.dicionario SELECT DISTINCT * FROM db_raw_alfabetizacao.dicionario;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InsertMetaBrasil",
+          "States": {
+            "InsertMetaBrasil": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_brasil SELECT DISTINCT * FROM db_raw_alfabetizacao.meta_alfabetizacao_brasil;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InsertMetaMunicipio",
+          "States": {
+            "InsertMetaMunicipio": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_municipio SELECT DISTINCT * FROM db_raw_alfabetizacao.meta_alfabetizacao_municipio;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InsertMetaUf",
+          "States": {
+            "InsertMetaUf": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_uf SELECT DISTINCT * FROM db_raw_alfabetizacao.meta_alfabetizacao_uf;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InsertMunicipio",
+          "States": {
+            "InsertMunicipio": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.municipio SELECT DISTINCT * FROM db_raw_alfabetizacao.municipio;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "InsertUF",
+          "States": {
+            "InsertUF": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+              "Parameters": {
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.uf SELECT DISTINCT *FROM db_raw_alfabetizacao.uf;",
+                "WorkGroup": "primary",
+                "ResultConfiguration": {
+                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                }
+              },
+              "End": true
+            }
+          }
+        }
+      ]
+    }
+  }
+}
