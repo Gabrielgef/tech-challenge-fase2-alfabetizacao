@@ -49,7 +49,7 @@
     },
     "ProcessarCamadaBronze": {
       "Type": "Parallel",
-      "End": true,
+      "Next": "ChamarOrquestradorSilver",
       "Branches": [
         {
           "StartAt": "InsertAlunos",
@@ -58,10 +58,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.alunos SELECT DISTINCT * FROM db_raw_alfabetizacao.alunos;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.alunos SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.alunos;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -75,10 +75,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.dicionario SELECT DISTINCT * FROM db_raw_alfabetizacao.dicionario;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.dicionario SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.dicionario;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -92,10 +92,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_brasil SELECT DISTINCT * FROM db_raw_alfabetizacao.meta_alfabetizacao_brasil;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_brasil SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.meta_alfabetizacao_brasil;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -109,10 +109,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_municipio SELECT DISTINCT * FROM db_raw_alfabetizacao.meta_alfabetizacao_municipio;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_municipio SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.meta_alfabetizacao_municipio;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -126,10 +126,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_uf SELECT DISTINCT * FROM db_raw_alfabetizacao.meta_alfabetizacao_uf;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_uf SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.meta_alfabetizacao_uf;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -143,10 +143,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.municipio SELECT DISTINCT * FROM db_raw_alfabetizacao.municipio;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.municipio SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.municipio;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -160,10 +160,10 @@
               "Type": "Task",
               "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
               "Parameters": {
-                "QueryString": "INSERT INTO db_bronze_alfabetizacao.uf SELECT DISTINCT *FROM db_raw_alfabetizacao.uf;",
+                "QueryString": "INSERT INTO db_bronze_alfabetizacao.uf SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.uf;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "s3://<NOME_DO_SEU_BUCKET>/athena_results_logs/"
+                  "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
                 }
               },
               "End": true
@@ -171,6 +171,18 @@
           }
         }
       ]
+    },
+    "ChamarOrquestradorSilver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::states:startExecution.sync",
+      "Parameters": {
+        "StateMachineArn": "arn:aws:states:us-east-1:263779083372:stateMachine:ingestao_silver",
+        "Input": {
+          "mensagem": "Camada Bronze finalizada via Athena. Disparando processamento Silver via AWS Glue.",
+          "data_inicio_silver.$": "$$.Execution.StartTime"
+        }
+      },
+      "End": true
     }
   }
 }

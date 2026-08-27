@@ -5,7 +5,7 @@ CREATE TABLE db_bronze_alfabetizacao.alunos
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/alunos/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/alunos/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
@@ -19,7 +19,7 @@ CREATE TABLE db_bronze_alfabetizacao.dicionario
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/dicionario/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/dicionario/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
@@ -33,7 +33,7 @@ CREATE TABLE db_bronze_alfabetizacao.meta_alfabetizacao_brasil
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/meta_alfabetizacao_brasil/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/meta_alfabetizacao_brasil/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
@@ -47,7 +47,7 @@ CREATE TABLE db_bronze_alfabetizacao.meta_alfabetizacao_municipio
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/meta_alfabetizacao_municipio/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/meta_alfabetizacao_municipio/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
@@ -61,7 +61,7 @@ CREATE TABLE db_bronze_alfabetizacao.meta_alfabetizacao_uf
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/meta_alfabetizacao_uf/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/meta_alfabetizacao_uf/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
@@ -75,7 +75,7 @@ CREATE TABLE db_bronze_alfabetizacao.municipio
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/municipio/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/municipio/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
@@ -89,7 +89,7 @@ CREATE TABLE db_bronze_alfabetizacao.uf
 WITH (
   format = 'PARQUET',
   parquet_compression = 'SNAPPY',
-  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/uf/',
+  external_location = 's3://<NOME_DO_SEU_BUCKET>/bronze/uf/'
 ) AS
 SELECT DISTINCT *, 
        CAST(current_timestamp AS TIMESTAMP) AS data_ingestao
