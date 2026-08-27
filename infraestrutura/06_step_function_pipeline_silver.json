@@ -1,0 +1,153 @@
+{
+  "Comment": "Pipeline de orquestração da Camada Silver - Transformações e Enriquecimento",
+  "StartAt": "CriarDatabaseSilver",
+  "States": {
+    "CriarDatabaseSilver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::athena:startQueryExecution.sync",
+      "Parameters": {
+        "QueryString": "CREATE DATABASE IF NOT EXISTS db_silver_alfabetizacao;",
+        "WorkGroup": "primary",
+        "ResultConfiguration": {
+          "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
+        }
+      },
+      "Next": "JobDicionarioSilver"
+    },
+    "JobDicionarioSilver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "01_silver_dicionario"
+      },
+      "Next": "ProcessamentoParaleloDimensoes"
+    },
+    "ProcessamentoParaleloDimensoes": {
+      "Type": "Parallel",
+      "Next": "JobAlunosSilver",
+      "Branches": [
+        {
+          "StartAt": "JobUfSilver",
+          "States": {
+            "JobUfSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "02_silver_uf"
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "JobMunicipioSilver",
+          "States": {
+            "JobMunicipioSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "03_silver_municipio"
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "JobMetaBrasilSilver",
+          "States": {
+            "JobMetaBrasilSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "04_silver_meta_brasil"
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "JobMetaMunicipioSilver",
+          "States": {
+            "JobMetaMunicipioSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "05_silver_meta_municipio"
+              },
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "JobMetaUfSilver",
+          "States": {
+            "JobMetaUfSilver": {
+              "Type": "Task",
+              "Resource": "arn:aws:states:::glue:startJobRun.sync",
+              "Parameters": {
+                "JobName": "06_silver_meta_uf"
+              },
+              "End": true
+            }
+          }
+        }
+      ]
+    },
+    "JobAlunosSilver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync",
+      "Parameters": {
+        "JobName": "07_silver_alunos"
+      },
+      "Next": "StartCrawlerSilver"
+    },
+    "StartCrawlerSilver": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:startCrawler",
+      "Parameters": {
+        "Name": "crawler_tech_challenge_silver"
+      },
+      "Next": "WaitForCrawlerSilver",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "Glue.CrawlerRunningException"
+          ],
+          "Next": "WaitForCrawlerSilver"
+        }
+      ]
+    },
+    "WaitForCrawlerSilver": {
+      "Type": "Wait",
+      "Seconds": 30,
+      "Next": "GetCrawlerStatusSilver"
+    },
+    "GetCrawlerStatusSilver": {
+      "Type": "Task",
+      "Parameters": {
+        "Name": "crawler_tech_challenge_silver"
+      },
+      "Resource": "arn:aws:states:::aws-sdk:glue:getCrawler",
+      "Next": "IsCrawlerRunningSilver"
+    },
+    "IsCrawlerRunningSilver": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "RUNNING",
+          "Next": "WaitForCrawlerSilver"
+        },
+        {
+          "Variable": "$.Crawler.State",
+          "StringEquals": "STOPPING",
+          "Next": "WaitForCrawlerSilver"
+        }
+      ],
+      "Default": "FinalizarPipeline"
+    },
+    "FinalizarPipeline": {
+      "Type": "Succeed"
+    }
+  }
+}
