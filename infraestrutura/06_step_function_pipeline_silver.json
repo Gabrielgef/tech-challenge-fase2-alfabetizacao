@@ -9,7 +9,7 @@
         "QueryString": "CREATE DATABASE IF NOT EXISTS db_silver_alfabetizacao;",
         "WorkGroup": "primary",
         "ResultConfiguration": {
-          "OutputLocation": "s3://data-lake-projetos-fiap-rm374559/athena_results_logs/"
+          "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
         }
       },
       "Next": "JobDicionarioSilver"
@@ -144,10 +144,19 @@
           "Next": "WaitForCrawlerSilver"
         }
       ],
-      "Default": "FinalizarPipeline"
+      "Default": "ChamarOrquestradorGold"
     },
-    "FinalizarPipeline": {
-      "Type": "Succeed"
+    "ChamarOrquestradorGold": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::states:startExecution.sync:2",
+      "Parameters": {
+        "StateMachineArn": "<Substitua pelo ARN da sua Step Function Gold>",
+        "Input": {
+          "mensagem": "Camada Silver finalizada via Athena. Disparando processamento Gold via AWS Glue.",
+          "data_inicio_silver.$": "$$.Execution.StartTime"
+        }
+      },
+      "End": true
     }
   }
 }
