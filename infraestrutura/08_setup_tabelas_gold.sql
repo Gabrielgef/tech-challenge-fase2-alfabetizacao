@@ -38,7 +38,7 @@ TBLPROPERTIES (
 CREATE TABLE IF NOT EXISTS db_gold_alfabetizacao.dim_serie (
     serie_key string,
     nome_serie string,
-    ordem integer,
+    ordem int,
     atualizado_em timestamp
 )
 LOCATION 's3://<BUCKET>/gold/dim_serie/'
@@ -49,7 +49,7 @@ TBLPROPERTIES (
 );
 
 CREATE TABLE IF NOT EXISTS db_gold_alfabetizacao.fct_resultado_alfabetizacao (
-    ano integer,
+    ano int,
     geo_key string,
     serie_key string,
     rede_key string,
@@ -81,8 +81,8 @@ TBLPROPERTIES (
 );
 
 CREATE TABLE IF NOT EXISTS db_gold_alfabetizacao.fct_meta_alfabetizacao (
-    ano_referencia integer,
-    ano_meta integer,
+    ano_referencia int,
+    ano_meta int,
     geo_key string,
     rede_key string,
     valor_meta_pct double,
@@ -100,7 +100,7 @@ TBLPROPERTIES (
 
 -- Habilitar somente após recuperar e reconciliar a Silver de alunos.
 CREATE TABLE IF NOT EXISTS db_gold_alfabetizacao.fct_cobertura_avaliacao (
-    ano integer,
+    ano int,
     geo_key string,
     serie_key string,
     rede_key string,
