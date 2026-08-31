@@ -61,7 +61,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.alunos SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.alunos;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true
@@ -78,7 +78,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.dicionario SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.dicionario;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true
@@ -95,7 +95,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_brasil SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.meta_alfabetizacao_brasil;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true
@@ -112,7 +112,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_municipio SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.meta_alfabetizacao_municipio;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true
@@ -129,7 +129,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.meta_alfabetizacao_uf SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.meta_alfabetizacao_uf;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true
@@ -146,7 +146,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.municipio SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.municipio;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true
@@ -163,7 +163,7 @@
                 "QueryString": "INSERT INTO db_bronze_alfabetizacao.uf SELECT DISTINCT *, CAST(current_timestamp AS TIMESTAMP) AS data_ingestao FROM db_raw_alfabetizacao.uf;",
                 "WorkGroup": "primary",
                 "ResultConfiguration": {
-                  "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+                  "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
                 }
               },
               "End": true

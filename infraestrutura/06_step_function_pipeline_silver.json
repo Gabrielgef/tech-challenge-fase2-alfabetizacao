@@ -9,7 +9,7 @@
         "QueryString": "CREATE DATABASE IF NOT EXISTS db_silver_alfabetizacao;",
         "WorkGroup": "primary",
         "ResultConfiguration": {
-          "OutputLocation": "<NOME_DO_SEU_BUCKET_S3_OUTPUT>"
+          "OutputLocation": "s3://<BUCKET_S3>/athena_results_logs/"
         }
       },
       "Next": "JobDicionarioSilver"
